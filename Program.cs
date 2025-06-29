@@ -1,215 +1,196 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Weaviate.Client;
 using Weaviate.Client.Models;
-using WeaviateProject;
+using Weaviate.Client.Models.Vectorizers;
 
-Console.WriteLine("Starting Weaviate C# Demo");
+namespace Example;
 
-// First check if Weaviate is running on localhost:8080
-Console.WriteLine("Checking if Weaviate is accessible at http://localhost:8080...");
-try
+class Program
 {
-    using var httpClient = new System.Net.Http.HttpClient();
-    httpClient.Timeout = TimeSpan.FromSeconds(5);
-    
-    for (int i = 0; i < 30; i++)
+    private record ProductDataWithVectors(float[] Vector, Product Data);
+
+    static async Task<List<ProductDataWithVectors>> GetProductsAsync(string filename)
     {
         try
         {
-            var response = await httpClient.GetAsync("http://localhost:8080/v1/.well-known/ready");
-            if (response.IsSuccessStatusCode)
+            if (!File.Exists(filename))
             {
-                Console.WriteLine("✓ Weaviate is ready!");
-                break;
+                Console.WriteLine($"File not found: {filename}");
+                return []; // Return an empty list if the file doesn't exist
             }
+
+            using FileStream fs = new FileStream(
+                filename,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                bufferSize: 4096,
+                useAsync: true
+            );
+
+            // Deserialize directly from the stream for better performance, especially with large files
+            var data = await JsonSerializer.DeserializeAsync<List<ProductDataWithVectors>>(fs) ?? [];
+
+            return data;
+        }
+        catch (JsonException ex)
+        {
+            Console.WriteLine($"Error deserializing JSON: {ex.Message}");
+            return []; // Return an empty list on deserialization error
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+            return []; // Return an empty list on any other error
+        }
+    }
+
+    static async Task Main()
+    {
+        // Read products from JSON file and unmarshal into Product class
+        var products = await GetProductsAsync("products.json");
+
+        // Use the C# client to store all products with a product class
+        Console.WriteLine("Products to store: " + products.Count);
+
+        // Connect to Weaviate Cloud
+        var WCD_HOST = "m99cxbchremlnhidbmv4ra.c0.europe-west3.gcp.weaviate.cloud";
+        var WCD_API_KEY = "U1FRejBQOS8xMjdhMFNQel84d3VDT2VJOU5ndERlWUZqYTh5NHB2U1BSQXJ0VTNMV3NYWlh3QUlvUlpZPV92MjAw";
+
+        var weaviate = Weaviate.Client.Connect.Cloud(WCD_HOST, WCD_API_KEY);
+
+        var collection = weaviate.Collections.Use<Product>("Product");
+
+        // Should throw CollectionNotFound
+        try
+        {
+            var collectionNotFound = await collection.Get();
         }
         catch
         {
-            Console.WriteLine($"Waiting for Weaviate HTTP endpoint... ({i + 1}/30)");
-            await Task.Delay(2000);
-            if (i == 29)
-            {
-                Console.WriteLine("❌ Weaviate HTTP endpoint not responding.");
-                Console.WriteLine("Please start Weaviate first:");
-                Console.WriteLine("docker-compose up -d");
-                return;
-            }
+            Console.WriteLine("Product collection not found");
         }
-    }
-}
-catch (Exception ex)
-{
-    Console.WriteLine($"❌ HTTP check failed: {ex.Message}");
-    return;
-}
 
-// Connect to Weaviate using localhost (default for Connect.Local())
-Console.WriteLine("Connecting to Weaviate client...");
-dynamic client;
-
-try
-{
-    client = Connect.Local(); // This should connect to localhost:8080 by default
-    Console.WriteLine("✓ Weaviate client created");
-}
-catch (Exception ex)
-{
-    Console.WriteLine($"❌ Failed to create Weaviate client: {ex.Message}");
-    return;
-}
-
-const string collectionName = "Article";
-
-try
-{
-    // Create collection
-    Console.WriteLine("Creating collection...");
-    await CreateCollectionAsync(client, collectionName);
-    Console.WriteLine("✓ Collection created");
-
-    // Insert sample data
-    Console.WriteLine("Inserting articles...");
-    await InsertArticlesAsync(client, collectionName);
-    Console.WriteLine("✓ Articles inserted");
-
-    // Verify collection exists
-    Console.WriteLine("Verifying articles...");
-    await VerifyCollectionAsync(client, collectionName);
-
-    // Clean up - delete collection
-    Console.WriteLine("Deleting collection...");
-    try
-    {
-        await client.Collections.Delete(collectionName);
-        Console.WriteLine("✓ Collection deleted");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Warning: Could not delete collection: {ex.Message}");
-    }
-
-    Console.WriteLine("Demo completed successfully!");
-}
-catch (Exception ex)
-{
-    Console.WriteLine($"Error: {ex.Message}");
-    Console.WriteLine($"Stack trace: {ex.StackTrace}");
-    Environment.Exit(1);
-}
-
-static async Task CreateCollectionAsync(dynamic client, string collectionName)
-{
-    try
-    {
-        // Create Collection object with proper structure
-        var collection = new Collection
+        // Delete any existing "Product" class
+        try
         {
-            Name = collectionName,
-            Description = "A collection for articles",
-            Properties = new Property[]
-            {
-                Property.Text("title"),
-                Property.Text("content"),
-                Property.Text("author"),
-                Property.Date("publishedDate"),
-                Property.TextArray("tags"),
-                Property.Text("url")
-            }
+            await collection.Delete();
+            Console.WriteLine("Deleted existing 'Product' collection");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error deleting collections: {e.Message}");
+        }
+
+        var productCollection = new Collection()
+        {
+            Name = "Product",
+            Description = "Product catalog with various tech items",
+            Properties = Property.FromCollection<Product>(),
+            VectorConfig = new VectorConfig("default", new Vectorizer.Text2VecWeaviate()),
         };
 
-        var result = await client.Collections.Create(collection);
-        Console.WriteLine($"Collection '{collectionName}' created successfully");
-    }
-    catch (Exception ex)
-    {
-        // If collection already exists, that's fine
-        if (ex.Message.Contains("already exists") || ex.Message.Contains("409") || ex.Message.Contains("conflict"))
-        {
-            Console.WriteLine($"Collection '{collectionName}' already exists - continuing");
-        }
-        else
-        {
-            Console.WriteLine($"Error creating collection: {ex.Message}");
-            throw;
-        }
-    }
-}
+        collection = await weaviate.Collections.Create<Product>(productCollection);
 
-static async Task InsertArticlesAsync(dynamic client, string collectionName)
-{
-    try
-    {
-        var collection = client.Collections.Use<Article>(collectionName);
-        
-        var articles = new List<Article>
+        await foreach (var c in weaviate.Collections.List())
         {
-            new Article
+            Console.WriteLine($"Collection: {c.Name}");
+        }
+
+        // Batch Insertion Demo
+        var batchInsertions = await collection.Data.InsertMany(add =>
+        {
+            products.ForEach(p => add(p.Data, vectors: new() { { "default", p.Vector } }));
+        });
+
+        // Get all objects and sum up the price property
+        var result = await collection.Query.List(limit: 250);
+        var retrieved = result.Objects.ToList();
+        Console.WriteLine("Products retrieved: " + retrieved.Count());
+        var totalPrice = retrieved.Sum(p => p.As<Product>()?.Price ?? 0);
+        Console.WriteLine($"Total price of all products: ${totalPrice:F2}");
+
+        // Delete object
+        var firstObj = retrieved.First();
+        if (firstObj.ID is Guid id)
+        {
+            await collection.Data.Delete(id);
+            Console.WriteLine($"Deleted product: {firstObj.As<Product>()?.Name}");
+        }
+
+        result = await collection.Query.List(limit: 5);
+        retrieved = result.Objects.ToList();
+        Console.WriteLine("Products retrieved after deletion: " + retrieved.Count());
+
+        firstObj = retrieved.First();
+        if (firstObj.ID is Guid id2)
+        {
+            var fetched = await collection.Query.FetchObjectByID(id: id2);
+            Console.WriteLine(
+                "Product retrieved via gRPC matches: " + ((fetched?.ID ?? Guid.Empty) == id2)
+            );
+            Console.WriteLine($"Product details: {fetched?.As<Product>()}");
+        }
+
+        // Fetch multiple products by IDs
+        {
+            var idList = retrieved
+                .Where(p => p.ID.HasValue)
+                .Take(3)
+                .Select(p => p.ID!.Value)
+                .ToHashSet();
+
+            var fetched = await collection.Query.FetchObjectsByIDs(idList);
+            Console.WriteLine($"Multiple products retrieved via gRPC:");
+            foreach (var obj in fetched.Objects)
             {
-                Title = "Introduction to Vector Databases",
-                Content = "Vector databases are specialized databases designed to store and query high-dimensional vectors efficiently.",
-                Author = "Jane Doe",
-                PublishedDate = DateTime.UtcNow.AddDays(-10),
-                Tags = new List<string> { "database", "vector", "AI" },
-                Url = "https://example.com/vector-db-intro"
-            },
-            new Article
-            {
-                Title = "Getting Started with Weaviate",
-                Content = "Weaviate is an open-source vector database that combines vector search with traditional filtering.",
-                Author = "John Smith",
-                PublishedDate = DateTime.UtcNow.AddDays(-5),
-                Tags = new List<string> { "weaviate", "tutorial", "getting-started" },
-                Url = "https://example.com/weaviate-tutorial"
-            },
-            new Article
-            {
-                Title = "Machine Learning and Semantic Search",
-                Content = "Semantic search leverages ML models to understand the meaning behind queries.",
-                Author = "Alice Johnson",
-                PublishedDate = DateTime.UtcNow.AddDays(-3),
-                Tags = new List<string> { "ML", "semantic-search", "NLP" },
-                Url = "https://example.com/semantic-search"
+                var product = obj.As<Product>();
+                Console.WriteLine($"  - {product?.Name} (${product?.Price:F2})");
             }
-        };
+        }
 
-        foreach (var article in articles)
-        {
-            var id = Guid.NewGuid();
-            await collection.Data.Insert(article, id: id);
-            Console.WriteLine($"  - Inserted: {article.Title}");
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error inserting articles: {ex.Message}");
-        throw;
-    }
-}
+        // Query near vector - find similar products
+        Console.WriteLine("\nQuerying similar products to vector [0.5f, 0.6f, 0.7f, 0.8f, 0.9f]:");
+        var queryNearVector = await collection.Query.NearVector(
+            vector: [0.5f, 0.6f, 0.7f, 0.8f, 0.9f],
+            distance: 0.5f,
+            limit: 5,
+            fields: ["name", "description", "brand", "price"],
+            metadata: MetadataOptions.Score | MetadataOptions.Distance
+        );
 
-static async Task VerifyCollectionAsync(dynamic client, string collectionName)
-{
-    try
-    {
-        // Try to get collection info to verify it exists and has data
-        var collection = client.Collections.Use<Article>(collectionName);
-        var collectionInfo = await collection.Get();
-        
-        if (collectionInfo != null)
+        foreach (var productObj in queryNearVector.Objects)
         {
-            Console.WriteLine($"✓ Collection '{collectionName}' exists and is accessible");
-            Console.WriteLine("Articles were inserted successfully!");
+            var product = productObj.As<Product>();
+            Console.WriteLine($"\nProduct: {product?.Name}");
+            Console.WriteLine($"Brand: {product?.Brand}");
+            Console.WriteLine($"Price: ${product?.Price:F2}");
         }
-        else
+
+        // Find products by price range
+        Console.WriteLine("\nFinding products under $100:");
+        var affordableProducts = retrieved
+            .Where(p => p.As<Product>()?.Price < 100)
+            .Select(p => p.As<Product>());
+
+        foreach (var product in affordableProducts)
         {
-            Console.WriteLine("⚠️ Collection verification failed");
+            Console.WriteLine($"  - {product?.Name}: ${product?.Price:F2}");
         }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Verification note: {ex.Message}");
-        Console.WriteLine("✓ This is normal - the collection was created and articles were inserted");
+
+        // Find premium products
+        Console.WriteLine("\nFinding premium products (over $200):");
+        var premiumProducts = retrieved
+            .Where(p => p.As<Product>()?.Price > 200)
+            .Select(p => p.As<Product>());
+
+        foreach (var product in premiumProducts)
+        {
+            Console.WriteLine($"  - {product?.Name}: ${product?.Price:F2}");
+        }
     }
 }

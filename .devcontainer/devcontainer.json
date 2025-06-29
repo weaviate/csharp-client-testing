@@ -1,6 +1,9 @@
 {
     "name": "C# Development",
-    "image": "mcr.microsoft.com/dotnet/sdk:8.0",
+    "dockerComposeFile": "../docker-compose.yml",
+    "service": "devcontainer",
+    "workspaceFolder": "/workspace",
+    "forwardPorts": [8080],
     "customizations": {
         "vscode": {
             "extensions": [
@@ -13,9 +16,5 @@
             }
         }
     },
-    "postCreateCommand": "dotnet restore WeaviateProject.csproj",
-    "forwardPorts": [8080],
-    "containerEnv": {
-        "DOTNET_CLI_TELEMETRY_OPTOUT": "1"
-    }
+    "postCreateCommand": "dotnet restore WeaviateProject.csproj"
 }

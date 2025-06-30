@@ -3,18 +3,13 @@
     "dockerComposeFile": "../docker-compose.yml",
     "service": "devcontainer",
     "workspaceFolder": "/workspace",
-    "forwardPorts": [8080],
     "customizations": {
         "vscode": {
             "extensions": [
-                "ms-dotnettools.csharp",
-                "ms-dotnettools.vscode-dotnet-runtime",
-                "ms-vscode.vscode-docker"
-            ],
-            "settings": {
-                "dotnet.server.useOmnisharp": true
-            }
+                "ms-dotnettools.csdevkit@1.4.29",
+                "ms-dotnettools.csharp@2.30.24"
+            ]
         }
     },
-    "postCreateCommand": "dotnet restore WeaviateProject.csproj"
+    "postCreateCommand": "dotnet restore csharp-client-testing.sln"
 }

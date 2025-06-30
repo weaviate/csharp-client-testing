@@ -21,8 +21,8 @@ services:
       - http
     image: cr.weaviate.io/semitechnologies/weaviate:1.30.0
     ports:
-      - 8080:8080
-      - 50051:50051
+      - 8085:8080
+      - 50055:50051
     restart: on-failure:0
     environment:
       QUERY_DEFAULTS_LIMIT: 25
@@ -43,4 +43,4 @@ services:
       ENABLE_COMPOUND_SPLITTING: 'false'
     image: cr.weaviate.io/semitechnologies/contextionary:en0.16.0-v1.2.1
     ports:
-      - 9999:9999
+      - 9998:9999

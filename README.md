@@ -17,6 +17,7 @@ A simple console application demonstrating basic Weaviate operations.
 4. Wait for container to build and Weaviate to start
 
 Once inside the container, run:
-5. `dotnet restore WeaviateProject.csproj`
-6. `dotnet run --project WeaviateProject.csproj`
 
+```
+dotnet run --project WeaviateProject.csproj
+```

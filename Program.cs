@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Weaviate.Client.Models;
-using Weaviate.Client.Models.Vectorizers;
 
 namespace Example;
 
@@ -58,22 +57,14 @@ class Program
         Console.WriteLine("Products to store: " + products.Count);
 
         // Connect to Weaviate Cloud
-        var WCD_HOST = "m99cxbchremlnhidbmv4ra.c0.europe-west3.gcp.weaviate.cloud";
-        var WCD_API_KEY = "U1FRejBQOS8xMjdhMFNQel84d3VDT2VJOU5ndERlWUZqYTh5NHB2U1BSQXJ0VTNMV3NYWlh3QUlvUlpZPV92MjAw";
+        var WCD_HOST = Environment.GetEnvironmentVariable("WCD_HOST")
+            ?? throw new InvalidOperationException("WCD_HOST environment variable is not set");
+        var WCD_API_KEY = Environment.GetEnvironmentVariable("WCD_API_KEY")
+            ?? throw new InvalidOperationException("WCD_API_KEY environment variable is not set");
 
         var weaviate = Weaviate.Client.Connect.Cloud(WCD_HOST, WCD_API_KEY);
 
         var collection = weaviate.Collections.Use<Product>("Product");
-
-        // Should throw CollectionNotFound
-        try
-        {
-            var collectionNotFound = await collection.Get();
-        }
-        catch
-        {
-            Console.WriteLine("Product collection not found");
-        }
 
         // Delete any existing "Product" class
         try
@@ -169,6 +160,7 @@ class Program
             Console.WriteLine($"\nProduct: {product?.Name}");
             Console.WriteLine($"Brand: {product?.Brand}");
             Console.WriteLine($"Price: ${product?.Price:F2}");
+            Console.WriteLine($"Metadata: ${productObj?.Metadata}");
         }
 
         // Find products by price range

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Weaviate.Client;
 using Weaviate.Client.Models;
 
-namespace Example;
+namespace WeaviateProject;
 
 class Program
 {
@@ -18,22 +18,30 @@ class Program
         Console.WriteLine("=== Weaviate C# Client Demo ===\n");
 
         // Connect to Weaviate
-        var weaviate = await ConnectToWeaviate();
+        var weaviate = ConnectToWeaviate();
+        await GetMetaInfo(weaviate);
 
-        // Clean up existing collections
+        //========================================
+        //             COLLECTIONS
+        //========================================
+
         await DeleteExistingCollections(weaviate);
-
-        // Create collections
         var (productHandle, categoryHandle) = await CreateCollections(weaviate);
 
-        // Insert data
+        //========================================
+        //             OBJECTS
+        //========================================
+        // Insert objects
         var categoryIds = await InsertCategories(categoryHandle);
         var products = await GetProductsAsync("products.json");
         var insertedProductIds = await InsertProducts(productHandle, products, categoryIds);
+        // Delete objects
+        await DeleteOneObject(productHandle, insertedProductIds.First());
+        //await DeleteManyObjects(productHandle, insertedProductIds.Skip(1).ToList());
 
-        // Demonstrate various query methods
-        Console.WriteLine("\n--- Query Operations ---");
-
+        //========================================
+        //             QUERIES
+        //========================================
         // Run all query demonstrations
         await QueryAffordableProducts(productHandle);
         await FetchProductById(productHandle, insertedProductIds.First());
@@ -43,12 +51,15 @@ class Program
         await ExportCollectionConfig(weaviate);
         await CalculateStatistics(productHandle);
 
+        // Generative search
+        // await GenerativeSearch(productHandle, "gaming laptop");
+
         Console.WriteLine("\n=== Demo completed successfully! ===");
     }
 
-    private static async Task<WeaviateClient> ConnectToWeaviate()
+    private static WeaviateClient ConnectToWeaviate()
     {
-        var wcdHost =Environment.GetEnvironmentVariable("WEAVIATE_HOSTNAME");
+        var wcdHost = Environment.GetEnvironmentVariable("WEAVIATE_HOSTNAME");
         var wcdApiKey = Environment.GetEnvironmentVariable("WEAVIATE_API_KEY");
 
         WeaviateClient weaviate;
@@ -61,10 +72,19 @@ class Program
         else
         {
             Console.WriteLine($"Connecting to Weaviate Cloud at {wcdHost}");
-            weaviate = Weaviate.Client.Connect.Cloud(wcdHost, wcdApiKey, addEmbeddingHeader:true);
+            weaviate = Weaviate.Client.Connect.Cloud(wcdHost, wcdApiKey, addEmbeddingHeader: true);
             Console.WriteLine($"Connected to Weaviate Cloud ({wcdHost})");
         }
         return weaviate;
+    }
+
+    private static async Task GetMetaInfo(WeaviateClient weaviate)
+    {
+        var meta = await weaviate.GetMeta();
+        Console.WriteLine($"Weaviate version: {meta.Version}");
+        Console.WriteLine($"Weaviate modules: " + JsonSerializer.Serialize(meta.Modules));
+        Console.WriteLine($"Weaviate hostname: {meta.Hostname}");
+        Console.WriteLine($"Weaviate max gRPC message size: {meta.GrpcMaxMessageSize}");
     }
 
     private static async Task DeleteExistingCollections(WeaviateClient weaviate)
@@ -98,7 +118,7 @@ class Program
         {
             Name = "Category",
             Description = "Product categories",
-            Properties = Property.FromCollection<Category>(),
+            Properties = [.. Property.FromCollection<Category>()],
             VectorConfig = new VectorConfig("category_vector", new Vectorizer.Text2VecWeaviate()),
             InvertedIndexConfig = new InvertedIndexConfig
             {
@@ -116,8 +136,8 @@ class Program
         {
             Name = "Product",
             Description = "Product catalog with various tech items",
-            Properties = Property.FromCollection<Product>(),
-            VectorConfig = new VectorConfig("product_vector", new Vectorizer.None()),
+            Properties = [.. Property.FromCollection<Product>()],
+            VectorConfig = new VectorConfig("product_vector", new Vectorizer.SelfProvided()),
             InvertedIndexConfig = new InvertedIndexConfig
             {
                 IndexTimestamps = true,
@@ -159,7 +179,7 @@ class Program
         {
             var id = await categoryHandle.Data.Insert(
                 category
-                //vectors: new NamedVectors { { "category_vector", vector } }
+            //vectors: new NamedVectors { { "category_vector", vector } }
             );
             categoryIds[category.Name!] = id;
             Console.WriteLine($"Inserted category: {category.Name} (ID: {id})");
@@ -216,15 +236,16 @@ class Program
         Console.WriteLine("\n2. Fetching specific product by ID:");
         var specificProduct = await productHandle.Query.FetchObjectByID(
             productId,
-            metadata: MetadataOptions.Full | MetadataOptions.Vector
+            metadata: MetadataOptions.Full | MetadataOptions.Vector,
+            properties: ["name", "description", "brand"]
+            // references: [new QueryReference("category", ["Name"])]
         );
 
         if (specificProduct != null)
         {
             var prod = specificProduct.As<Product>();
             Console.WriteLine($"  Product: {prod?.Name}");
-            Console.WriteLine($"  Created: {specificProduct.Metadata.CreationTime}");
-            Console.WriteLine($"  Vector name: {specificProduct.Vectors.Keys.FirstOrDefault()}");
+            Console.WriteLine($"  Vector: {specificProduct.Vectors.Keys.FirstOrDefault()}");
         }
     }
 
@@ -327,4 +348,22 @@ class Program
             return new List<ProductDataWithVectors>();
         }
     }
+
+    private static async Task DeleteOneObject(CollectionClient<Product> productHandle, Guid productId)
+    {
+        Console.WriteLine($"\nDeleting single product with ID: {productId}");
+        await productHandle.Data.Delete(productId);
+        Console.WriteLine("Product deleted successfully.");
+    }
+
+    // private static async Task DeleteManyObjects(CollectionClient<Product> productHandle, List<Guid> productIds)
+    // {
+    //     Console.WriteLine($"\nDeleting {productIds.Count} products...");
+    //     //var deleteResults = await productHandle.Data.DeleteMany(productIds);
+    //     var deleteResults = await productHandle.Data.DeleteMany(
+    //         where: Filter.ID.ContainsAny(productIds)
+    //     );
+    //     var successCount = deleteResults.Count(r => r.Error == null);
+    //     Console.WriteLine($"Deleted {successCount} products successfully.");
+    // }
 }

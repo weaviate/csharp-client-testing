@@ -1,7 +1,7 @@
 using System;
 using System.Text.Json.Serialization;
 
-namespace Example;
+namespace WeaviateProject;
 
 public record Product
 {

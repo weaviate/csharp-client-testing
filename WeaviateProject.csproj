@@ -6,8 +6,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
+  <!-- <ItemGroup>
     <PackageReference Include="Weaviate.Client" Version="0.0.1-beta.2" />
+  </ItemGroup> -->
+  <ItemGroup>
+    <ProjectReference Include="/Users/ivandespot/dev/csharp-client/src/Weaviate.Client/Weaviate.Client.csproj" />
   </ItemGroup>
 
 </Project>

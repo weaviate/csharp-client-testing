@@ -21,3 +21,25 @@ Once inside the container, run:
 ```
 dotnet run --project WeaviateProject.csproj
 ```
+
+### Covered
+
+Connection:
+- Connect to local instance
+- Connect to Weaviate Cloud
+- Get meta info
+
+Collections:
+- Create collection 
+- Check collection exists
+- Delete collection
+- List all collections
+
+Objects:
+- Insert object with vectors
+- Insert object without vectors
+- Delete one object
+- TODO - Delete many objects 
+
+Queries:
+- Fetch by ID

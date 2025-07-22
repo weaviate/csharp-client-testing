@@ -1,82 +1,38 @@
 [
   {
-    "Vector": [0.1, 0.2, 0.3, 0.4, 0.5],
-    "Data": {
-      "name": "Ultra HD Monitor",
-      "description": "32-inch 4K professional monitor with HDR support",
-      "brand": "ViewPro",
-      "image": "https://example.com/monitor.jpg",
-      "price": 599.99,
-      "stockQuantity": 75,
-      "isAvailable": true,
-      "releaseDate": "2024-03-15T00:00:00Z",
-      "tags": ["electronics", "display", "professional"],
-      "ratings": [4.8, 4.9, 4.7, 4.8],
-      "category": "Electronics"
-    }
+    "Name": "Wireless Noise-Cancelling Headphones",
+    "Description": "High-fidelity audio with adaptive noise cancellation.",
+    "Price": 349.99,
+    "IsAvailable": true
   },
   {
-    "Vector": [0.2, 0.3, 0.4, 0.5, 0.6],
-    "Data": {
-      "name": "Professional Microphone",
-      "description": "Studio-quality USB microphone for content creators",
-      "brand": "AudioPro",
-      "image": "https://example.com/microphone.jpg",
-      "price": 249.99,
-      "stockQuantity": 120,
-      "isAvailable": true,
-      "releaseDate": "2024-01-20T00:00:00Z",
-      "tags": ["audio", "recording", "professional"],
-      "ratings": [4.6, 4.7, 4.5],
-      "category": "Audio"
-    }
+    "Name": "4K Ultra-HD Smart TV",
+    "Description": "A 65-inch television with vibrant colors and smart features.",
+    "Price": 799.99,
+    "IsAvailable": true
   },
   {
-    "Vector": [0.3, 0.4, 0.5, 0.6, 0.7],
-    "Data": {
-      "name": "Gaming Mouse Pro",
-      "description": "High-precision wireless gaming mouse with RGB lighting",
-      "brand": "GameTech",
-      "image": "https://example.com/mouse.jpg",
-      "price": 89.99,
-      "stockQuantity": 200,
-      "isAvailable": true,
-      "releaseDate": "2024-05-10T00:00:00Z",
-      "tags": ["gaming", "electronics", "peripherals"],
-      "ratings": [4.9, 4.8, 4.9, 5.0],
-      "category": "Gaming"
-    }
+    "Name": "Mechanical Gaming Keyboard",
+    "Description": "RGB backlit keyboard with cherry MX switches.",
+    "Price": 129.99,
+    "IsAvailable": false
   },
   {
-    "Vector": [0.4, 0.5, 0.6, 0.7, 0.8],
-    "Data": {
-      "name": "Portable SSD 2TB",
-      "description": "Ultra-fast portable solid state drive",
-      "brand": "DataStore",
-      "image": "https://example.com/ssd.jpg",
-      "price": 179.99,
-      "stockQuantity": 0,
-      "isAvailable": false,
-      "releaseDate": "2023-11-01T00:00:00Z",
-      "tags": ["storage", "electronics", "portable"],
-      "ratings": [4.4, 4.3, 4.5],
-      "category": "Electronics"
-    }
+    "Name": "Portable Power Bank",
+    "Description": "20,000mAh portable charger for all your devices.",
+    "Price": 49.99,
+    "IsAvailable": true
   },
   {
-    "Vector": [0.5, 0.6, 0.7, 0.8, 0.9],
-    "Data": {
-      "name": "RGB Gaming Headset",
-      "description": "7.1 surround sound gaming headset with noise cancellation",
-      "brand": "SoundMax",
-      "image": "https://example.com/headset.jpg",
-      "price": 129.99,
-      "stockQuantity": 150,
-      "isAvailable": true,
-      "releaseDate": "2024-02-28T00:00:00Z",
-      "tags": ["gaming", "audio", "headset"],
-      "ratings": [4.7, 4.6, 4.8, 4.7],
-      "category": "Gaming"
-    }
+    "Name": "Smart Home Hub",
+    "Description": "Control all your smart home devices from one central hub.",
+    "Price": 99.50,
+    "IsAvailable": true
+  },
+  {
+    "Name": "HD Webcam",
+    "Description": "A 1080p webcam for clear video calls and streaming.",
+    "Price": 65.00,
+    "IsAvailable": true
   }
 ]

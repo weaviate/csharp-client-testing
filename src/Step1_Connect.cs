@@ -11,7 +11,7 @@ public static class Step1_Connect
     {
         Console.WriteLine("--- Step 1: Connecting to Weaviate ---");
 
-        var client = Connect.Local(restPort: 8085, grpcPort: 50055);
+        var client = Connect.Local(restPort: 8080, grpcPort: 50051);
 
         try
         {

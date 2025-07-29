@@ -1,15 +1,31 @@
 {
     "name": "C# Development",
-    "dockerComposeFile": "../docker-compose.yml",
+    "dockerComposeFile": "./docker-compose.yml",
     "service": "devcontainer",
     "workspaceFolder": "/workspace",
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {
+            "version": "latest",
+            "enableNonRootDocker": "true"
+        },
+        "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
     "customizations": {
         "vscode": {
             "extensions": [
                 "ms-dotnettools.csdevkit@1.4.29",
-                "ms-dotnettools.csharp@2.30.24"
+                "ms-dotnettools.csharp@2.30.24",
+                "ms-azuretools.vscode-docker"
             ]
         }
     },
-    "postCreateCommand": "dotnet restore csharp-client-testing.sln"
+    "postCreateCommand": "dotnet restore csharp-client-testing.sln",
+    "forwardPorts": [
+        8080,
+        50051
+    ],
+    "mounts": [
+        "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind"
+    ]
 }

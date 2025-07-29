@@ -1,16 +1,4 @@
 services:
-  devcontainer:
-    image: mcr.microsoft.com/dotnet/sdk:8.0
-    volumes:
-      - .:/workspace
-      - /var/run/docker.sock:/var/run/docker.sock
-    working_dir: /workspace
-    command: sleep infinity
-    environment:
-      DOTNET_CLI_TELEMETRY_OPTOUT: "1"
-    depends_on:
-      - weaviate_anon
-    
   weaviate_anon:
     command:
       - --host
@@ -21,8 +9,8 @@ services:
       - http
     image: cr.weaviate.io/semitechnologies/weaviate:1.32.0
     ports:
-      - 8085:8080
-      - 50055:50051
+      - 8080:8080
+      - 50051:50051
     restart: on-failure:0
     environment:
       QUERY_DEFAULTS_LIMIT: 25
@@ -43,4 +31,4 @@ services:
       ENABLE_COMPOUND_SPLITTING: 'false'
     image: cr.weaviate.io/semitechnologies/contextionary:en0.16.0-v1.2.1
     ports:
-      - 9998:9999
+      - 9999:9999

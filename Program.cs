@@ -7,52 +7,124 @@ namespace WeaviateProject;
 
 class Program
 {
+    // Boolean variables to control execution flow
+    private static bool step1_connect = false;
+    private static bool step2_createCollection = false;
+    private static bool step3_populateCollection = false;
+    private static bool step4_fetchById = false;
+    private static bool step5_nearTextQuery = false;
+    private static bool step6_aggregationQuery = false;
+    private static bool step7_deleteObjects = false;
+    private static bool step8_deleteCollection = false;
+
     static async Task Main()
     {
-        Console.WriteLine("=== Weaviate C# Demo Start ===\n");
-
-        // --- Step 1: Connect to Weaviate ---
-        // Establishes a connection to your Weaviate instance.
-        WeaviateClient? client = await Step1_Connect.Run();
-        if (client is null) return;
-
-        // The name of our collection
-        string collectionName = Constants.CollectionConstants.CollectionName;
-
-        // --- Step 2: Create Collection ---
-        // Deletes any existing collection and creates a new one with a defined schema.
-        var productCollection = await Step2_CreateCollection.Run(client, collectionName);
-
-        // --- Step 3: Populate Collection ---
-        // Inserts a batch of product data into the new collection.
-        var insertedIds = await Step3_PopulateCollection.Run(productCollection);
-
-        // Wait for import to complete before querying
-        await Task.Delay(2000); 
-
-        // --- Step 4: Fetch by ID ---
-        // Retrieves a single product object using its unique ID.
-        if (insertedIds.Any())
+        try
         {
-            await Step4_FetchById.Run(productCollection, insertedIds.First());
+            await Execute();
         }
+        catch (Exception e)
+        {
+            Console.WriteLine($"\nAn error occurred during the demo: {e.Message}");
+            Console.WriteLine(e.StackTrace);
+        }
+        Console.WriteLine("\nDemo finished.");
+    }
 
-        // --- Step 5: Near Text Query ---
-        // Performs a semantic search to find products related to a text concept.
-        await Step5_NearTextQuery.Run(productCollection);
+    private static async Task Execute()
+    {
+        Console.WriteLine("=== Weaviate C# Client - User testing ===\n");
 
-        // --- Step 6: Aggregation Query ---
-        // Calculates aggregate statistics (e.g., average price) across the data.
-        await Step6_AggregationQuery.Run(productCollection);
+        WeaviateClient? client = null;
+        try
+        {
+            // STEP 1: Connect to Weaviate
+            if (!step1_connect) return;
+            Console.WriteLine("===============================");
+            Console.WriteLine("===== Step 1: Connect to Weaviate =====");
+            Console.WriteLine("===============================");
+            client = await Step1_Connect.Run();
+            if (client is null) return;
 
-        // --- Step 7: Delete Objects ---
-        // Removes specific objects from the collection based on a filter.
-        await Step7_DeleteObjects.Run(productCollection, insertedIds.First());
+            // The name of our collection
+            string collectionName = Constants.CollectionConstants.CollectionName;
 
-        // --- Step 8: Delete Collection ---
-        // Deletes the entire collection to clean up.
-        await Step8_DeleteCollection.Run(client, collectionName);
+            // STEP 2: Create Collection
+            if (!step2_createCollection) return;
+            Console.WriteLine("\n===============================");
+            Console.WriteLine("===== Step 2: Create Collection =====");
+            Console.WriteLine("===============================");
+            var productCollection = await Step2_CreateCollection.Run(client, collectionName);
+            Console.WriteLine("Collection created successfully.");
 
-        Console.WriteLine("\n=== Demo completed successfully! ===");
+            // STEP 3: Populate Collection
+            if (!step3_populateCollection) return;
+            Console.WriteLine("\n===============================");
+            Console.WriteLine("===== Step 3: Populate Collection =====");
+            Console.WriteLine("===============================");
+            var insertedIds = await Step3_PopulateCollection.Run(productCollection);
+
+            if (!insertedIds.Any())
+            {
+                Console.WriteLine("No data was created, skipping query steps.");
+                return;
+            }
+            Console.WriteLine("Objects created successfully.");
+
+            // Wait for import to complete before querying
+            await Task.Delay(2000);
+
+            // STEP 4: Fetch by ID
+            if (!step4_fetchById) return;
+            Console.WriteLine("\n===============================");
+            Console.WriteLine("===== Step 4: Fetch Object by ID =====");
+            Console.WriteLine("===============================");
+            await Step4_FetchById.Run(productCollection, insertedIds.First());
+
+            // STEP 5: Near Text Query
+            if (!step5_nearTextQuery) return;
+            Console.WriteLine("\n===============================");
+            Console.WriteLine("===== Step 5: NearText Vector Search =====");
+            Console.WriteLine("===============================");
+            await Step5_NearTextQuery.Run(productCollection);
+
+            // STEP 6: Aggregation Query
+            if (!step6_aggregationQuery) return;
+            Console.WriteLine("\n===============================");
+            Console.WriteLine("===== Step 6: Aggregate Query =====");
+            Console.WriteLine("===============================");
+            await Step6_AggregationQuery.Run(productCollection);
+
+            // STEP 7: Delete Objects
+            if (!step7_deleteObjects) return;
+            Console.WriteLine("\n===============================");
+            Console.WriteLine("===== Step 7: Delete Objects =====");
+            Console.WriteLine("===============================");
+            await Step7_DeleteObjects.Run(productCollection, insertedIds.First());
+
+            // STEP 8: Delete Collection
+            if (!step8_deleteCollection) return;
+            Console.WriteLine("\n===============================");
+            Console.WriteLine("===== Step 8: Delete Collection =====");
+            Console.WriteLine("===============================");
+            await Step8_DeleteCollection.Run(client, collectionName);
+
+            Console.WriteLine("\n=== Demo completed successfully! ===");
+        }
+        finally
+        {
+            if (client != null)
+            {
+                try
+                {
+                    client.Dispose();
+                    Console.WriteLine("\nWeaviate client disposed.");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Error disposing Weaviate client: {e.Message}");
+                }
+            }
+        }
     }
 }

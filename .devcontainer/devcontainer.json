@@ -1,6 +1,6 @@
 {
     "name": "C# Development",
-    "dockerComposeFile": "./docker-compose.yml",
+    "dockerComposeFile": "../docker-compose.yml",
     "service": "devcontainer",
     "workspaceFolder": "/workspace",
     "features": {
@@ -21,10 +21,6 @@
         }
     },
     "postCreateCommand": "dotnet restore csharp-client-testing.sln",
-    "forwardPorts": [
-        8080,
-        50051
-    ],
     "mounts": [
         "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind"
     ]

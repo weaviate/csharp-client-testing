@@ -7,10 +7,10 @@
   </PropertyGroup>
 
   <!-- <ItemGroup>
-    <PackageReference Include="Weaviate.Client" Version="0.0.1-beta.2" />
+    <ProjectReference Include="../csharp-client/src/Weaviate.Client/Weaviate.Client.csproj" />
   </ItemGroup> -->
   <ItemGroup>
-    <ProjectReference Include="/Users/ivandespot/dev/csharp-client/src/Weaviate.Client/Weaviate.Client.csproj" />
+    <PackageReference Include="Weaviate.Client" Version="0.0.1-beta.2" />
   </ItemGroup>
 
 </Project>

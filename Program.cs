@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Weaviate.Client;
-using Weaviate.Client.Models;
 
 namespace WeaviateProject;
 
@@ -14,11 +13,11 @@ class Program
 
         // --- Step 1: Connect to Weaviate ---
         // Establishes a connection to your Weaviate instance.
-        var client = await Step1_Connect.Run();
+        WeaviateClient? client = await Step1_Connect.Run();
         if (client is null) return;
 
         // The name of our collection
-        const string collectionName = "Products";
+        string collectionName = Constants.CollectionConstants.CollectionName;
 
         // --- Step 2: Create Collection ---
         // Deletes any existing collection and creates a new one with a defined schema.
@@ -27,6 +26,9 @@ class Program
         // --- Step 3: Populate Collection ---
         // Inserts a batch of product data into the new collection.
         var insertedIds = await Step3_PopulateCollection.Run(productCollection);
+
+        // Wait for import to complete before querying
+        await Task.Delay(2000); 
 
         // --- Step 4: Fetch by ID ---
         // Retrieves a single product object using its unique ID.
@@ -45,7 +47,7 @@ class Program
 
         // --- Step 7: Delete Objects ---
         // Removes specific objects from the collection based on a filter.
-        await Step7_DeleteObjects.Run(productCollection);
+        await Step7_DeleteObjects.Run(productCollection, insertedIds.First());
 
         // --- Step 8: Delete Collection ---
         // Deletes the entire collection to clean up.

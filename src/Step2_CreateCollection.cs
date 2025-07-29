@@ -4,6 +4,7 @@ using Weaviate.Client;
 using Weaviate.Client.Models;
 
 namespace WeaviateProject;
+using WeaviateProject.Constants;
 
 public static class Step2_CreateCollection
 {
@@ -22,11 +23,11 @@ public static class Step2_CreateCollection
         var productCollection = new Collection
         {
             Name = collectionName,
-            Description = "A collection of tech products",
+            Description = CollectionConstants.CollectionDescription,
             Properties = [.. Property.FromCollection<Product>()],
             // Use Weaviate's built-in vectorizer
             // Requires a text-vectorization module (e.g., text2vec-transformers) in your Docker Compose
-            VectorConfig = new VectorConfig("product_vector", new Vectorizer.Text2VecWeaviate())
+            VectorConfig = new VectorConfig(CollectionConstants.VectorName, new Vectorizer.Text2VecContextionary())
         };
 
         var collection = await client.Collections.Create<Product>(productCollection);

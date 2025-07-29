@@ -14,7 +14,12 @@ public static class Step3_PopulateCollection
     {
         Console.WriteLine("\n--- Step 3: Populating Collection from JSON file ---");
 
-        List<Product> productsToInsert = await LoadProductsFromFile("../products.json");
+        List<Product> productsToInsert = await LoadProductsFromFile("./data/products.json");
+        if (productsToInsert == null || productsToInsert.Count == 0)
+        {
+            Console.WriteLine("No products to insert. Exiting step.");
+            return new List<Guid>();
+        }
         var insertedIds = new List<Guid>();
 
         // Loop through the list and insert one product at a time.

@@ -15,10 +15,10 @@ public static class Step7_DeleteObjects
 
         Console.WriteLine($"Successfully deleted objects.");
 
-        // Verify deletion by counting remaining objects
-        var countResult = await collection.Aggregate.OverAll(
-            metrics: [Metrics.ForProperty("name").Text(count: true)]);
-        var nameStats = countResult.Properties["name"] as Aggregate.Text;
-        Console.WriteLine($"Remaining objects in collection: {nameStats?.Count ?? 0}");
+        // // Verify deletion by counting remaining objects
+        // var countResult = await collection.Aggregate.OverAll(
+        //     metrics: [Metrics.ForProperty("name").Text(count: true)]);
+        // var nameStats = countResult.Properties["name"] as Aggregate.Text;
+        // Console.WriteLine($"Remaining objects in collection: {nameStats?.Count ?? 0}");
     }
 }

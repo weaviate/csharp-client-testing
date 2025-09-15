@@ -9,22 +9,11 @@ public static class Step6_AggregationQuery
 {
     public static async Task Run(CollectionClient<Product> collection)
     {
-        var aggregationResult = await collection.Aggregate.OverAll(
-            metrics:
-            [
-                Metrics.ForProperty("price").Number(count: true, minimum: true, maximum: true, mean: true)
-            ]
-        );
-
-        var priceStats = aggregationResult.Properties["price"] as Aggregate.Number;
-
-        if (priceStats != null)
-        {
-            Console.WriteLine("Product Price Statistics:");
-            Console.WriteLine($"  Count: {priceStats.Count}");
-            Console.WriteLine($"  Average Price: ${priceStats.Mean:F2}");
-            Console.WriteLine($"  Maximum Price: ${priceStats.Maximum:F2}");
-            Console.WriteLine($"  Minimum Price: ${priceStats.Minimum:F2}");
-        }
+        // Perform the following aggregate query: 
+        //      Group all products by availability name and for each group find the maximum and minimum price.
+        //
+        // See Weaviate docs:
+        //      Integer properties: https://csharp-client--docs-weaviate-io.netlify.app/weaviate/search/aggregate#aggregate-int-properties
+        //      Group by: https://csharp-client--docs-weaviate-io.netlify.app/weaviate/search/aggregate#aggregate-groupedby-properties
     }
 }

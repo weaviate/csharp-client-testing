@@ -9,14 +9,9 @@ public static class Step7_DeleteObjects
 {
     public static async Task Run(CollectionClient<Product> collection, Guid productId)
     {
-        await collection.Data.Delete(productId);
-
-        Console.WriteLine($"Successfully deleted objects.");
-
-        // Verify deletion by counting remaining objects
-        var countResult = await collection.Aggregate.OverAll(
-            metrics: [Metrics.ForProperty("name").Text(count: true)]);
-        var nameStats = countResult.Properties["name"] as Aggregate.Text;
-        Console.WriteLine($"Remaining objects in collection: {nameStats?.Count ?? 0}");
+        // Delete an object with UUID productId and check if it exists after deletion
+        //
+        // See Weaviate docs: 
+        //      Delete objects: https://csharp-client--docs-weaviate-io.netlify.app/weaviate/manage-objects/delete#delete-object-by-id
     }
 }

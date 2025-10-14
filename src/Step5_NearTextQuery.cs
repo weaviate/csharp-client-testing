@@ -13,6 +13,6 @@ public static class Step5_NearTextQuery
         // Perform the nearText query specified in Constants.NearTextQuery
         //
         // See Weaviate docs: 
-        //      Vector search: https://csharp-client--docs-weaviate-io.netlify.app/weaviate/search/similarity#search-with-text
+        //      Vector search: https://client-libraries-beta--docs-weaviate-io.netlify.app/weaviate/search/similarity
     }
 }

@@ -12,6 +12,6 @@ public static class Step7_DeleteObjects
         // Delete an object with UUID productId and check if it exists after deletion
         //
         // See Weaviate docs: 
-        //      Delete objects: https://csharp-client--docs-weaviate-io.netlify.app/weaviate/manage-objects/delete#delete-object-by-id
+        //      Delete objects: https://client-libraries-beta--docs-weaviate-io.netlify.app/weaviate/manage-objects/delete
     }
 }

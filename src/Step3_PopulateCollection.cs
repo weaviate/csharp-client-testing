@@ -18,7 +18,7 @@ public static class Step3_PopulateCollection
         // Return the created object IDs in the "insertedIds" list
         //
         // See Weaviate docs: 
-        //      Create a new object: https://csharp-client--docs-weaviate-io.netlify.app/weaviate/manage-objects/create#create-an-object
+        //      Create a new object: https://client-libraries-beta--docs-weaviate-io.netlify.app/weaviate/manage-objects/create
 
         // This is where the object creation code goes
         // insertedIds.Add(...) // Add the objects to the appropriate list once created

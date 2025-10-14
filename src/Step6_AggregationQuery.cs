@@ -13,7 +13,6 @@ public static class Step6_AggregationQuery
         //      Group all products by availability name and for each group find the maximum and minimum price.
         //
         // See Weaviate docs:
-        //      Integer properties: https://csharp-client--docs-weaviate-io.netlify.app/weaviate/search/aggregate#aggregate-int-properties
-        //      Group by: https://csharp-client--docs-weaviate-io.netlify.app/weaviate/search/aggregate#aggregate-groupedby-properties
+        //      Aggregations: https://client-libraries-beta--docs-weaviate-io.netlify.app/weaviate/search/aggregate
     }
 }

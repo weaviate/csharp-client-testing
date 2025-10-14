@@ -11,6 +11,6 @@ public static class Step8_DeleteCollection
         // Delete the "Product" collection and check if it exists after deletion
         //
         // See Weaviate docs:
-        //      Delete collections: https://csharp-client--docs-weaviate-io.netlify.app/weaviate/manage-collections/collection-operations#delete-a-collection
+        //      Delete collections: https://client-libraries-beta--docs-weaviate-io.netlify.app/weaviate/manage-collections/collection-operations
     }
 }

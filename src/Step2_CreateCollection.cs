@@ -15,8 +15,8 @@ public static class Step2_CreateCollection
         // The collection uses the text2vecContextionary vectorizer and has the vector Constants.VectorName
         //
         // See Weaviate docs: 
-        //      Create a collection with properties: https://csharp-client--docs-weaviate-io.netlify.app/weaviate/manage-collections/collection-operations#create-a-collection-and-define-properties
-        //      Define a vectorizer: https://csharp-client--docs-weaviate-io.netlify.app/weaviate/manage-collections/vector-config
+        //      Create a collection with properties: https://client-libraries-beta--docs-weaviate-io.netlify.app/weaviate/manage-collections/collection-operations
+        //      Define a vectorizer: https://client-libraries-beta--docs-weaviate-io.netlify.app/weaviate/manage-collections/vector-config
         return null;
     }
 }

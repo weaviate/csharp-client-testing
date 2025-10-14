@@ -13,6 +13,6 @@ public static class Step4_FetchById
         // Also print out the metadata, properties, and vector of the object
         //
         // See Weaviate docs: 
-        //      Get object by ID: https://csharp-client--docs-weaviate-io.netlify.app/weaviate/search/basics#fetch-objects-by-id
+        //      Get object by ID: https://client-libraries-beta--docs-weaviate-io.netlify.app/weaviate/search/basics
     }
 }

@@ -10,9 +10,19 @@ public static class Step5_NearTextQuery
 {
     public static async Task Run(CollectionClient<Product> collection)
     {
-        // Perform the nearText query specified in Constants.NearTextQuery
-        //
-        // See Weaviate docs: 
-        //      Vector search: https://client-libraries-beta--docs-weaviate-io.netlify.app/weaviate/search/similarity
+        Console.WriteLine("\n--- Step 5: Performing a Near Text Query ---");
+        Console.WriteLine($"Searching for products similar to: '{QueryConstants.NearTextQuery}'");
+
+        var queryResult = await collection.Query.NearText(
+            QueryConstants.NearTextQuery,
+            limit: 3,
+            returnMetadata: MetadataOptions.Distance);
+
+        Console.WriteLine("Search Results:");
+        foreach (var obj in queryResult.Objects)
+        {
+            var product = obj.As<Product>();
+            Console.WriteLine($"- {product?.Name} (Distance: {obj.Metadata.Distance:F4})");
+        }
     }
 }

@@ -10,13 +10,25 @@ public static class Step2_CreateCollection
 {
     public static async Task<CollectionClient<Product>> Run(WeaviateClient client, string collectionName)
     {
-        // Create collection with name Constants.CollectionName and description Constants.CollectionDescription
-        // The collection should store objects defined in Product.cs 
-        // The collection uses the text2vecContextionary vectorizer and has the vector Constants.VectorName
-        //
-        // See Weaviate docs: 
-        //      Create a collection with properties: https://client-libraries-beta--docs-weaviate-io.netlify.app/weaviate/manage-collections/collection-operations
-        //      Define a vectorizer: https://client-libraries-beta--docs-weaviate-io.netlify.app/weaviate/manage-collections/vector-config
-        return null;
+        // Clean up previous runs by deleting the collection if it exists
+        if (await client.Collections.Exists(collectionName))
+        {
+            await client.Collections.Delete(collectionName);
+            Console.WriteLine($"Deleted existing collection: '{collectionName}'");
+        }
+
+        // Define the collection schema
+        var productCollection = new Collection
+        {
+            Name = collectionName,
+            Description = CollectionConstants.CollectionDescription,
+            Properties = [.. Property.FromClass<Product>()],
+            // Use Weaviate Cloud's built-in vectorizer
+            VectorConfig = new VectorConfig(CollectionConstants.VectorName, new Vectorizer.Text2VecWeaviate())
+        };
+
+        var collection = await client.Collections.Create<Product>(productCollection);
+        Console.WriteLine($"Successfully created collection: '{collectionName}'");
+        return collection;
     }
 }

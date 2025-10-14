@@ -11,18 +11,21 @@ public static class Step3_PopulateCollection
     public static async Task<List<Guid>> Run(CollectionClient<Product> collection)
     {
         List<Product> productsToInsert = await ProductLoader.LoadProductsFromFile("./data/products.json");
+        if (productsToInsert == null || productsToInsert.Count == 0)
+        {
+            Console.WriteLine("No products to insert. Exiting step.");
+            return new List<Guid>();
+        }
         var insertedIds = new List<Guid>();
 
-        // Populate the "Product" collection with data from a JSON file (productsToInsert)
-        //
-        // Return the created object IDs in the "insertedIds" list
-        //
-        // See Weaviate docs: 
-        //      Create a new object: https://client-libraries-beta--docs-weaviate-io.netlify.app/weaviate/manage-objects/create
+        // Loop through the list and insert one product at a time.
+        foreach (var product in productsToInsert)
+        {
+            var id = await collection.Data.Insert(product);
+            insertedIds.Add(id);
+        }
 
-        // This is where the object creation code goes
-        // insertedIds.Add(...) // Add the objects to the appropriate list once created
-
-        return null;
+        Console.WriteLine($"Successfully inserted {insertedIds.Count} products.");
+        return insertedIds;
     }
 }

@@ -18,7 +18,7 @@ public static class Step2_CreateCollection
         }
 
         // Define the collection schema
-        var productCollection = new Collection
+        var productCollection = new CollectionConfig
         {
             Name = collectionName,
             Description = CollectionConstants.CollectionDescription,

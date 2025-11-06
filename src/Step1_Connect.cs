@@ -17,9 +17,8 @@ public static class Step1_Connect
 
         try
         {
-            var meta = await client.GetMeta();
-            Console.WriteLine($"Connected to Weaviate v{meta.Version} on {meta.Hostname}");
-            Console.WriteLine($"Modules: {JsonSerializer.Serialize(meta.Modules)}");
+            var isReady = await client.IsReady();
+            Console.WriteLine("Is Weaviate ready: " + isReady);
             return client;
         }
         catch (Exception ex)
